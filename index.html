@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Photo Backup</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* CSS Variables for Color Palette */
+        :root {
+            --bg-white: #ffffff;
+            --sidebar-bg: #fafafa;
+            --text-main: #1a1a1a;
+            --text-muted: #737373;
+            --border-color: #eaeaea;
+            
+            /* Gradients & Accents */
+            --teal-blue-grad: linear-gradient(135deg, #00b4db 0%, #0083b0 100%);
+            --coral-orange-grad: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%);
+            --accent-teal-light: #e0f7fa;
+            --accent-teal: #00b4db;
+            --accent-blue: #0083b0;
+        }
+
+        /* Reset & Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-white);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- Layout: Left Sidebar --- */
+        .sidebar {
+            width: 280px;
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+        }
+
+        .brand {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 32px;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .brand i {
+            color: var(--accent-teal);
+        }
+
+        .btn-create {
+            background: var(--teal-blue-grad);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 14px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: opacity 0.2s;
+            margin-bottom: 32px;
+            box-shadow: 0 4px 12px rgba(0, 180, 219, 0.2);
+        }
+
+        .btn-create:hover {
+            opacity: 0.9;
+        }
+
+        .folder-list-header {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+
+        .folder-list {
+            list-style: none;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .folder-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-bottom: 4px;
+        }
+
+        .folder-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        .folder-item.active {
+            background-color: var(--accent-teal-light);
+            color: var(--accent-blue);
+            font-weight: 500;
+        }
+
+        .folder-item.active .folder-icon {
+            color: var(--accent-blue);
+        }
+
+        .folder-icon {
+            color: var(--text-muted);
+            margin-right: 12px;
+            font-size: 1.1rem;
+        }
+
+        .folder-name {
+            flex: 1;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .folder-count {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* --- Layout: Main Content --- */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            padding: 32px 48px;
+            background-color: var(--bg-white);
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .header-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .search-bar {
+            position: relative;
+        }
+
+        .search-bar i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .search-bar input {
+            padding: 10px 16px 10px 36px;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            width: 250px;
+            outline: none;
+            transition: border-color 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .search-bar input:focus {
+            border-color: var(--accent-teal);
+        }
+
+        .profile-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #eee;
+            background-image: url('https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80');
+            background-size: cover;
+            cursor: pointer;
+        }
+
+        /* Upload Zone */
+        .upload-section {
+            margin-bottom: 40px;
+        }
+
+        .upload-zone {
+            border: 2px dashed #d4d4d4;
+            border-radius: 16px;
+            padding: 60px 20px;
+            text-align: center;
+            background-color: #fafafa;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .upload-zone:hover {
+            border-color: var(--accent-teal);
+            background-color: var(--accent-teal-light);
+        }
+
+        .upload-zone i {
+            font-size: 3rem;
+            color: var(--accent-teal);
+            margin-bottom: 16px;
+        }
+
+        .upload-zone h2 {
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: var(--text-main);
+            margin-bottom: 8px;
+        }
+
+        .upload-zone p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        /* Progress Bar */
+        .status-bar {
+            margin-top: 24px;
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+
+        .status-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 8px;
+            background-color: var(--border-color);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 85%;
+            background: var(--coral-orange-grad);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        /* Gallery Grid */
+        .gallery-section {
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+
+        .date-group h3 {
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+        }
+
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .photo-item {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            aspect-ratio: 4 / 3;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .photo-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .photo-item:hover img {
+            transform: scale(1.05);
+        }
+        
+        .photo-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            display: flex;
+            align-items: flex-end;
+            padding: 12px;
+        }
+
+        .photo-item:hover .photo-overlay {
+            opacity: 1;
+        }
+        
+        .photo-info {
+            color: white;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Left Sidebar -->
+    <aside class="sidebar">
+        <div class="brand">
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+            <span>PhotoVault</span>
+        </div>
+
+        <button class="btn-create">
+            <i class="fa-solid fa-plus"></i> Create New Folder
+        </button>
+
+        <div class="folder-list-header">My Folders</div>
+        
+        <ul class="folder-list">
+            <li class="folder-item active">
+                <i class="fa-solid fa-folder folder-icon"></i>
+                <span class="folder-name">Architecture 2026</span>
+                <span class="folder-count">450 files</span>
+            </li>
+            <li class="folder-item">
+                <i class="fa-solid fa-folder folder-icon"></i>
+                <span class="folder-name">Landscape Raw</span>
+                <span class="folder-count">1,204 files</span>
+            </li>
+            <li class="folder-item">
+                <i class="fa-solid fa-folder folder-icon"></i>
+                <span class="folder-name">Vacation - Bali</span>
+                <span class="folder-count">328 files</span>
+            </li>
+            <li class="folder-item">
+                <i class="fa-solid fa-folder folder-icon"></i>
+                <span class="folder-name">Studio Portraits</span>
+                <span class="folder-count">85 files</span>
+            </li>
+            <li class="folder-item">
+                <i class="fa-solid fa-folder folder-icon"></i>
+                <span class="folder-name">Wedding G&M</span>
+                <span class="folder-count">2,100 files</span>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        
+        <!-- Header -->
+        <header class="header">
+            <h1 class="header-title">Architecture 2026</h1>
+            <div class="header-actions">
+                <div class="search-bar">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" placeholder="Search photos...">
+                </div>
+                <div class="profile-avatar" title="User Profile"></div>
+            </div>
+        </header>
+
+        <!-- Upload Zone & Progress -->
+        <section class="upload-section">
+            <div class="upload-zone">
+                <i class="fa-solid fa-camera-retro"></i>
+                <h2>Upload Professional Photos (Drag & Drop)</h2>
+                <p>Supports RAW, JPEG, PNG, and TIFF formats</p>
+            </div>
+
+            <!-- Status Bar -->
+            <div class="status-bar">
+                <div class="status-header">
+                    <span>Uploading "Modernist_Villa_Exterior.raw"</span>
+                    <span style="color: #ff7e5f;">Upload Progress: 85%</span>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-fill"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Photo Gallery -->
+        <section class="gallery-section">
+            
+            <div class="date-group">
+                <h3>Today, May 9, 2026</h3>
+                <div class="photo-grid">
+                    <!-- Placeholder Professional Images from Unsplash -->
+                    <div class="photo-item">
+                        <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=600&q=80" alt="Architecture 1">
+                        <div class="photo-overlay"><span class="photo-info">Villa_Ext_01.raw</span></div>
+                    </div>
+                    <div class="photo-item">
+                        <img src="https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=600&q=80" alt="Architecture 2">
+                        <div class="photo-overlay"><span class="photo-info">Villa_Int_02.raw</span></div>
+                    </div>
+                    <div class="photo-item">
+                        <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=600&q=80" alt="Architecture 3">
+                        <div class="photo-overlay"><span class="photo-info">Villa_Pool_03.raw</span></div>
+                    </div>
+                    <div class="photo-item">
+                        <img src="https://images.unsplash.com/photo-1600607687644-aac4c3eac7f4?auto=format&fit=crop&w=600&q=80" alt="Architecture 4">
+                        <div class="photo-overlay"><span class="photo-info">Villa_Detail_04.raw</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="date-group">
+                <h3>Yesterday, May 8, 2026</h3>
+                <div class="photo-grid">
+                    <div class="photo-item">
+                        <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=600&q=80" alt="Architecture 5">
+                        <div class="photo-overlay"><span class="photo-info">Corp_Tower_01.raw</span></div>
+                    </div>
+                    <div class="photo-item">
+                        <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=600&q=80" alt="Architecture 6">
+                        <div class="photo-overlay"><span class="photo-info">Corp_Lobby_02.raw</span></div>
+                    </div>
+                    <div class="photo-item">
+                        <img src="https://images.unsplash.com/photo-1481277542470-605612bd2d61?auto=format&fit=crop&w=600&q=80" alt="Architecture 7">
+                        <div class="photo-overlay"><span class="photo-info">Corp_Hall_03.raw</span></div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+</body>
+</html>
